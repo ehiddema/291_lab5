@@ -208,7 +208,7 @@ void main (void)
 
 	while(1)
 	{
-        // Measure half period at pin P1.0 using timer 0
+        // Measure half period at pin P1.0 using timer 0 --- TODO: need to change to correct pin
         TR0=0; // Stop timer 0
         TMOD=0B_0000_0001; // Set timer 0 as 16-bit timer
         TH0=0; TL0=0; // Reset the timer
