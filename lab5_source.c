@@ -188,9 +188,17 @@ float Volts_at_Pin(unsigned char pin)
 	 return ((ADC_at_Pin(pin)*VDD)/0b_0011_1111_1111_1111);
 }
 
+void TIMER0_Init(void)
+{
+	TMOD&=0b_1111_0000; // Set the bits of Timer/Counter 0 to zero
+	TMOD|=0b_0000_0001; // Timer/Counter 0 used as a 16-bit timer
+	TR0=0; // Stop Timer/Counter 0
+}
+
 void main (void)
 {
 	float v[4];
+    int Period;
 
     waitms(500); // Give PuTTy a chance to start before sending
 	printf("\x1b[2J"); // Clear screen using ANSI escape sequence.
@@ -205,6 +213,8 @@ void main (void)
 	InitPinADC(2, 4); // Configure P2.4 as analog input
 	InitPinADC(2, 5); // Configure P2.5 as analog input
     InitADC();
+
+    TIMER0_Init();
 
 	while(1)
 	{
