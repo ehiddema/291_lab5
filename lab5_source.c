@@ -198,8 +198,10 @@ void TIMER0_Init(void)
 void main (void)
 {
 	float v[4];
-    int Period;
-
+    float Period;
+	
+	TIMER0_Init(); 
+	
     waitms(500); // Give PuTTy a chance to start before sending
 	printf("\x1b[2J"); // Clear screen using ANSI escape sequence.
 	
@@ -207,28 +209,56 @@ void main (void)
 	        "File: %s\n"
 	        "Compiled: %s, %s\n\n",
 	        __FILE__, __DATE__, __TIME__);
+	        
 	
 	InitPinADC(2, 2); // Configure P2.2 as analog input
-	InitPinADC(2, 3); // Configure P2.3 as analog input
+	//InitPinADC(2, 3); // Configure P2.3 as analog input
 	InitPinADC(2, 4); // Configure P2.4 as analog input
 	InitPinADC(2, 5); // Configure P2.5 as analog input
     InitADC();
 
-    TIMER0_Init();
-
+        
 	while(1)
 	{
-        // Measure half period at pin P1.0 using timer 0 --- TODO: need to change to correct pin
-        TR0=0; // Stop timer 0
-        TMOD=0B_0000_0001; // Set timer 0 as 16-bit timer
-        TH0=0; TL0=0; // Reset the timer
-        while (P1_0==1); // Wait for the signal to be zero
-        while (P1_0==0); // Wait for the signal to be one
-        TR0=1; // Start timing
-        while (P1_0==1); // Wait for the signal to be zero
-        TR0=0; // Stop timer 0
-        // [TH0,TL0] is half the period in multiples of 12/CLK, so:
-        Period=(TH0*0x100+TL0)*2; // Assume Period is unsigned int
+        // // Measure half period at pin P1.0 using timer 0 --- TODO: need to change to correct pin
+        // TR0=0; // Stop timer 0
+        // TMOD=0B_0000_0001; // Set timer 0 as 16-bit timer
+        // TH0=0; TL0=0; // Reset the timer
+        // while (P2_2==1); // Wait for the signal to be zero
+        // while (P2_2==0); // Wait for the signal to be one
+        // TR0=1; // Start timing
+        // while (P2_2==1); // Wait for the signal to be zero
+        // TR0=0; // Stop timer 0
+        // // [TH0,TL0] is half the period in multiples of 12/CLK, so:
+        // Period=(TH0*0x100+TL0)*2; // Assume Period is unsigned int
+        
+        int overflow_count = 0;
+        
+		while(P2_3!=0); // Wait for the signal to be zero
+		while(P2_3!=1); // Wait for the signal to be one
+		TR0=1; // Start the timer
+		while(P2_2!=0) // Wait for the signal to be zero
+		{
+			if(TF0==1) // Did the 16-bit timer overflow?
+			{
+				TF0=0;
+				overflow_count++;
+			}
+		}
+		while(P2_3!=1) // Wait for the signal to be one
+		{
+			if(TF0==1) // Did the 16-bit timer overflow?
+			{
+				TF0=0;
+				overflow_count++;
+			}
+		}
+		TR0=0; // Stop timer 0, the 24-bit number [overflow_count-TH0-TL0] has the period!
+		Period = (overflow_count*65536.0+TH0*256.0+TL0)*(12.0/SYSCLK);
+		printf("period: %f\n", Period); 
+		TL0 = 0;
+		TH0 = 0;
+
 
 
 	    // Read 14-bit value from the pins configured as analog inputs
@@ -238,5 +268,5 @@ void main (void)
 		v[3] = Volts_at_Pin(QFP32_MUX_P2_5);
 		printf ("V@P2.2=%7.5fV, V@P2.3=%7.5fV, V@P2.4=%7.5fV, V@P2.5=%7.5fV\r", v[0], v[1], v[2], v[3]);
 		waitms(500);
-	 }  
+	}
 }	
