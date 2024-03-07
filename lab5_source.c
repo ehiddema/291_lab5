@@ -513,7 +513,7 @@ void main (void)
 		waitms(500);
 
 		// printing values to LCD
-		sprintf(buffer, "vr=%.1fV  vo=%.1fV", rms_ref, rms_oth);
+		sprintf(buffer, "vr=%.2f  vo=%.2f", rms_ref, rms_oth);
 		LCDprint(buffer, 1,1);
 
 		sprintf(buffer, "f=%.1fhz ph=%.1f", frequency_ref, phase);
