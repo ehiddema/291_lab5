@@ -213,19 +213,6 @@ void LCDprint(char * string, unsigned char line, bit clear)
 	if(clear) for(; j<CHARS_PER_LINE; j++) WriteData(' '); // Clear the rest of the line
 }
 
-#include <string.h>
-void display_data(float freq, float vref, float voth, float phase)
-{
-	char buffer[17];
-	char str1[] = "vr%f2.1 vo%f2.1";
-	char str2[] = "f%f2.1 p%f3.1";
-	strcpy(buffer, vref, voth, str1);
-	LCDprint(buffer, 1, 1);
-
-	strcpy(buffer, freq, phase, str2);
-	LCDprint(buffer, 2, 1);
-
-}
 
 void InitPinADC (unsigned char portno, unsigned char pinno)
 {
@@ -516,6 +503,9 @@ void main (void)
 
 		// convert time diff between zero-crosses to degrees and display -------------------------------------------
 		phase = (360*timediff)/period_ref;
+		if (phase > 180){
+			phase -= 360;
+		}
 		printf("phase: %f", phase);
 
 		
@@ -524,5 +514,12 @@ void main (void)
 		v[1] = Volts_at_Pin(QFP32_MUX_P2_5);
 		//printf ("V@P2.3=%7.5fV, V@P2.5=%7.5fV\r", v[0], v[1]);
 		waitms(500);
+
+		// printing values to LCD
+		sprintf(buffer, "vr=%f.1V  vo=%f.1V", rms_ref, rms_oth);
+		LCDprint(buffer, 1,1);
+
+		sprintf(buffer, "freq=%f.1hz  ph=%f.1", frequency_ref, phase);
+		LCDprint(buffer, 2,1);
 	}
 }	
