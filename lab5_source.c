@@ -147,6 +147,13 @@ void waitms (unsigned int ms)
 		for (k=0; k<4; k++) Timer3us(250);
 }
 
+void LCD_pulse (void)
+{
+	LCD_E=1;
+	Timer3us(40);
+	LCD_E=0;
+}
+
 void LCD_byte (unsigned char x)
 {
 	// The accumulator in the C8051Fxxx is bit addressable!
@@ -204,6 +211,20 @@ void LCDprint(char * string, unsigned char line, bit clear)
 	waitms(5);
 	for(j=0; string[j]!=0; j++)	WriteData(string[j]);// Write the message
 	if(clear) for(; j<CHARS_PER_LINE; j++) WriteData(' '); // Clear the rest of the line
+}
+
+#include <string.h>
+void display_data(float freq, float vref, float voth, float phase)
+{
+	char buffer[17];
+	char str1[] = "vr%f2.1 vo%f2.1";
+	char str2[] = "f%f2.1 p%f3.1";
+	strcpy(buffer, vref, voth, str1);
+	LCDprint(buffer, 1, 1);
+
+	strcpy(buffer, freq, phase, str2);
+	LCDprint(buffer, 2, 1);
+
 }
 
 void InitPinADC (unsigned char portno, unsigned char pinno)
