@@ -12,6 +12,15 @@
 #define SARCLK 18000000L
 #define VDD 3.3035 // The measured value of VDD in volts
 
+#define LCD_RS P1_7
+// #define LCD_RW Px_x // Not used in this code.  Connect to GND
+#define LCD_E  P2_0
+#define LCD_D4 P1_3
+#define LCD_D5 P1_2
+#define LCD_D6 P1_1
+#define LCD_D7 P1_0
+#define CHARS_PER_LINE 16
+
 char _c51_external_startup (void)
 {
 	// Disable Watchdog with key sequence
@@ -138,13 +147,16 @@ void Timer3us(unsigned char us)
 	}
 	TMR3CN0 = 0 ;                   // Stop Timer3 and clear overflow flag
 }
-
 void waitms (unsigned int ms)
 {
 	unsigned int j;
-	unsigned char k;
-	for(j=0; j<ms; j++)
-		for (k=0; k<4; k++) Timer3us(250);
+	for(j=ms; j!=0; j--)
+	{
+		Timer3us(249);
+		Timer3us(249);
+		Timer3us(249);
+		Timer3us(250);
+	}
 }
 
 void LCD_pulse (void)
@@ -516,10 +528,10 @@ void main (void)
 		waitms(500);
 
 		// printing values to LCD
-		sprintf(buffer, "vr=%f.1V  vo=%f.1V", rms_ref, rms_oth);
+		sprintf(buffer, "vr=.1%fV  vo=%.1fV", rms_ref, rms_oth);
 		LCDprint(buffer, 1,1);
 
-		sprintf(buffer, "freq=%f.1hz  ph=%f.1", frequency_ref, phase);
+		sprintf(buffer, "f=.1%fhz ph=.1%f", frequency_ref, phase);
 		LCDprint(buffer, 2,1);
 	}
 }	
