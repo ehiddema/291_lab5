@@ -434,21 +434,6 @@ float get_peakVolt_oth(float period)
 	return peak_volt;
 }
 
-#include <string.h>
-void display_data(float freq, float vref, float voth, float phase)
-{
-	char buffer[17];
-	char str1[] = "vr%f2.1 vo%f2.1";
-	char str2[] = "f%f2.1 p%f3.1";
-	strcpy(buffer, vref, voth, str1);
-	LCDprint(buffer, 1, 1);
-
-	strcpy(buffer, freq, phase, str2);
-	LCDprint(buffer, 2, 1);
-
-}
-
-
 void main (void)
 {
 	// PINOUTS:
@@ -528,10 +513,10 @@ void main (void)
 		waitms(500);
 
 		// printing values to LCD
-		sprintf(buffer, "vr=.1%fV  vo=%.1fV", rms_ref, rms_oth);
+		sprintf(buffer, "vr=%.1fV  vo=%.1fV", rms_ref, rms_oth);
 		LCDprint(buffer, 1,1);
 
-		sprintf(buffer, "f=.1%fhz ph=.1%f", frequency_ref, phase);
+		sprintf(buffer, "f=%.1fhz ph=%.1f", frequency_ref, phase);
 		LCDprint(buffer, 2,1);
 	}
 }	
